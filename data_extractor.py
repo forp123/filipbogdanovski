@@ -25,8 +25,12 @@ class DataExtractor:
 
     def extract_data(self, input_filename, output_filename, customer_codes):
         data = []
-        with open(input_filename, 'r', encoding='utf-8-sig') as file:
-            reader = csv.reader(file)
+        #   with open(output_filename, 'w', newline='') as file:
+            #writer = csv.writer(file)
+           # writer.writerows(cleaned_data)
+        with open(input_filename, 'r', encoding='utf-8-sig') as input_file, open(output_filename, 'w', newline='') as output_file:
+            reader = csv.reader(input_file)
+            writer = csv.writer(output_file)
             header = next(reader)
             data.append(header)
 
@@ -46,21 +50,15 @@ class DataExtractor:
             for row in reader:
 
                 if input_filename == CUSTOMER_CSV and row[customer_code_index] in customer_codes:
-                    data.append(row)
+                    writer.writerow(row)
+
                 elif input_filename == INVOICE_CSV and row[customer_code_index] in customer_codes:
-                    data.append(row)
+                    writer.writerow(row)
                     if invoice_code_index != -1:
                         self.invoice_codes.add(row[invoice_code_index])
 
                 elif input_filename == INVOICE_ITEM_CSV and row[invoice_code_index] in self.invoice_codes:
-                    data.append(row)
+                    writer.writerow(row)
 
-        self.write_data(data, output_filename)
 
-    def write_data(self, data, output_filename):
 
-        cleaned_data = [row if not row[0].startswith('\ufeff') else [row[0][1:]] + row[1:] for row in data]
-
-        with open(output_filename, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerows(cleaned_data)
