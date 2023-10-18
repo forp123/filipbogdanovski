@@ -1,6 +1,17 @@
 import csv
 
 
+def find_column_index(input_filename, target_column_name):
+    with open(input_filename, 'r', encoding='utf-8-sig') as file:
+        reader = csv.reader(file)
+        header = next(reader)
+        target_column_name = target_column_name.strip().lower()
+        for idx, column in enumerate(header):
+            if column.strip().lower() == target_column_name:
+                return idx
+    return -1
+
+
 class DataExtractor:
     def __init__(self):
         self.customer_codes_dict = {}
@@ -9,24 +20,31 @@ class DataExtractor:
     def extract_data(self, input_filename, output_filename, customer_codes):
         data = []
 
-        with open(input_filename, 'r', encoding='utf-8') as file:
+        target_column_name = "CUSTOMER_CODE" if input_filename in ['CUSTOMER.CSV', 'INVOICE.CSV'] else "INVOICE_CODE"
+        target_column_found = find_column_index(input_filename, target_column_name)
+
+        if target_column_found == -1:
+            print(f'Column "{target_column_name}" not found in {input_filename}')
+            return
+
+        invoice_code_index = -1
+        if input_filename == 'INVOICE.CSV':
+            invoice_code_index = find_column_index(input_filename, 'INVOICE_CODE')
+
+        with open(input_filename, 'r', encoding='utf-8-sig') as file:
             reader = csv.reader(file)
             header = next(reader)
             data.append(header)
 
             for row in reader:
-                # print(f"Checking row[0]: {row[0]}")
-                # print(row)
-                # print(f"Keys in invoice_codes: {self.invoice_codes.keys()}")
-                # print(f"{input_filename}, {row[0]}")
-                # print(f"{self.invoice_codes}")
-                if input_filename == 'CUSTOMER.CSV' and row[0] in customer_codes:
+
+                if input_filename == 'CUSTOMER.CSV' and row[target_column_found] in customer_codes:
                     data.append(row)
-                elif input_filename == 'INVOICE.CSV' and row[0] in customer_codes:
+                elif input_filename == 'INVOICE.CSV' and row[target_column_found] in customer_codes:
                     data.append(row)
-                    self.invoice_codes_dict[row[1]] = None
-                elif input_filename == 'INVOICE_ITEM.CSV' and row[0] in self.invoice_codes_dict:
-                    # print(f"Should add row: {row}")
+                    if invoice_code_index != -1:
+                        self.invoice_codes_dict[row[invoice_code_index]] = None
+                elif input_filename == 'INVOICE_ITEM.CSV' and row[target_column_found] in self.invoice_codes_dict:
                     data.append(row)
 
         self.write_data(data, output_filename)
