@@ -24,15 +24,12 @@ class DataExtractor:
         self.invoice_codes = set()
 
     def extract_data(self, input_filename, output_filename, customer_codes):
-        data = []
-        #   with open(output_filename, 'w', newline='') as file:
-            #writer = csv.writer(file)
-           # writer.writerows(cleaned_data)
+
         with open(input_filename, 'r', encoding='utf-8-sig') as input_file, open(output_filename, 'w', newline='') as output_file:
             reader = csv.reader(input_file)
             writer = csv.writer(output_file)
             header = next(reader)
-            data.append(header)
+            writer.writerow(header)
 
             customer_code_index = -1
             if input_filename == CUSTOMER_CSV or INVOICE_CSV:
