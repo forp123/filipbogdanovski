@@ -34,15 +34,13 @@ class DataExtractor:
             customer_code_index = -1
             if input_filename == CUSTOMER_CSV or INVOICE_CSV:
                 customer_code_index = find_column_index(header, CUSTOMER_CODE_COLUMN_NAME)
-            print(f'Column "{CUSTOMER_CODE_COLUMN_NAME}"  in {input_filename} = {customer_code_index}')
-            if customer_code_index == -1:
-                print(f'Column "{CUSTOMER_CODE_COLUMN_NAME}" not found in {input_filename}')
+            print(f'Column "{CUSTOMER_CODE_COLUMN_NAME}" index in file: {input_filename} is {customer_code_index}')
 
             invoice_code_index = -1
             if input_filename == INVOICE_CSV or INVOICE_ITEM_CSV:
                 invoice_code_index = find_column_index(header, INVOICE_CODE_COLUMN_NAME)
 
-            print(f'Column "{INVOICE_CODE_COLUMN_NAME}"  in {input_filename} = {invoice_code_index}')
+            print(f'Column "{INVOICE_CODE_COLUMN_NAME}" index in file: {input_filename} is {invoice_code_index}')
 
             for row in reader:
 
