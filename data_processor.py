@@ -10,9 +10,9 @@ class DataProcessor:
         self.invoice_item_file = invoice_item_file
 
     def read_customer_sample(self):
-        customer_codes = {}
+        customer_codes = set()
         for row in self.customer_sample_file.read():
-            customer_codes[row[0]] = None
+            customer_codes.add(row[0])
         return customer_codes
 
     def process_and_write_data(self):

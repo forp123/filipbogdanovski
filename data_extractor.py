@@ -1,50 +1,58 @@
 import csv
 
+CUSTOMER_CSV = "CUSTOMER.CSV"
+INVOICE_CSV = "INVOICE.CSV"
+INVOICE_ITEM_CSV = "INVOICE_ITEM.CSV"
 
-def find_column_index(input_filename, target_column_name):
-    with open(input_filename, 'r', encoding='utf-8-sig') as file:
-        reader = csv.reader(file)
-        header = next(reader)
-        target_column_name = target_column_name.strip().lower()
-        for idx, column in enumerate(header):
-            if column.strip().lower() == target_column_name:
-                return idx
+INVOICE_CODE_COLUMN_NAME = "INVOICE_CODE"
+CUSTOMER_CODE_COLUMN_NAME = "CUSTOMER_CODE"
+
+
+
+
+def find_column_index(header, target_column_name):
+    target_column_name = target_column_name.strip().lower()
+    for idx, column in enumerate(header):
+        if column.strip().lower() == target_column_name:
+            return idx
     return -1
 
 
 class DataExtractor:
     def __init__(self):
-        self.customer_codes_dict = {}
-        self.invoice_codes_dict = {}
+        self.customer_codes = set()
+        self.invoice_codes = set()
 
     def extract_data(self, input_filename, output_filename, customer_codes):
         data = []
-
-        target_column_name = "CUSTOMER_CODE" if input_filename in ['CUSTOMER.CSV', 'INVOICE.CSV'] else "INVOICE_CODE"
-        target_column_found = find_column_index(input_filename, target_column_name)
-
-        if target_column_found == -1:
-            print(f'Column "{target_column_name}" not found in {input_filename}')
-            return
-
-        invoice_code_index = -1
-        if input_filename == 'INVOICE.CSV':
-            invoice_code_index = find_column_index(input_filename, 'INVOICE_CODE')
-
         with open(input_filename, 'r', encoding='utf-8-sig') as file:
             reader = csv.reader(file)
             header = next(reader)
             data.append(header)
 
+            customer_code_index = -1
+            if input_filename == CUSTOMER_CSV or INVOICE_CSV:
+                customer_code_index = find_column_index(header, CUSTOMER_CODE_COLUMN_NAME)
+            print(f'Column "{CUSTOMER_CODE_COLUMN_NAME}"  in {input_filename} = {customer_code_index}')
+            if customer_code_index == -1:
+                print(f'Column "{CUSTOMER_CODE_COLUMN_NAME}" not found in {input_filename}')
+
+            invoice_code_index = -1
+            if input_filename == INVOICE_CSV or INVOICE_ITEM_CSV:
+                invoice_code_index = find_column_index(header, INVOICE_CODE_COLUMN_NAME)
+
+            print(f'Column "{INVOICE_CODE_COLUMN_NAME}"  in {input_filename} = {invoice_code_index}')
+
             for row in reader:
 
-                if input_filename == 'CUSTOMER.CSV' and row[target_column_found] in customer_codes:
+                if input_filename == CUSTOMER_CSV and row[customer_code_index] in customer_codes:
                     data.append(row)
-                elif input_filename == 'INVOICE.CSV' and row[target_column_found] in customer_codes:
+                elif input_filename == INVOICE_CSV and row[customer_code_index] in customer_codes:
                     data.append(row)
                     if invoice_code_index != -1:
-                        self.invoice_codes_dict[row[invoice_code_index]] = None
-                elif input_filename == 'INVOICE_ITEM.CSV' and row[target_column_found] in self.invoice_codes_dict:
+                        self.invoice_codes.add(row[invoice_code_index])
+
+                elif input_filename == INVOICE_ITEM_CSV and row[invoice_code_index] in self.invoice_codes:
                     data.append(row)
 
         self.write_data(data, output_filename)
